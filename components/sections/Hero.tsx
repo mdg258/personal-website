@@ -3,39 +3,48 @@
 import { Terminal, TerminalOutput, TerminalCursor } from '@/components/ui/Terminal';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-function TypingText({ text, delay = 0, shouldStart = true }: { text: string; delay?: number; shouldStart?: boolean }) {
+function TypingText({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep ref updated
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
 
   useEffect(() => {
-    if (!shouldStart) return;
-
+    let typingInterval: NodeJS.Timeout;
     const startTimeout = setTimeout(() => {
       let currentIndex = 0;
-      const typingInterval = setInterval(() => {
+      typingInterval = setInterval(() => {
         if (currentIndex <= text.length) {
           setDisplayedText(text.slice(0, currentIndex));
           currentIndex++;
         } else {
           clearInterval(typingInterval);
           setIsComplete(true);
+          if (onCompleteRef.current) {
+            onCompleteRef.current();
+          }
         }
       }, 50);
-
-      return () => clearInterval(typingInterval);
     }, delay);
 
-    return () => clearTimeout(startTimeout);
-  }, [text, delay, shouldStart]);
+    return () => {
+      clearTimeout(startTimeout);
+      if (typingInterval) clearInterval(typingInterval);
+    };
+  }, [text, delay]);
 
   return (
-    <div className={`flex items-center mb-2 ${shouldStart ? 'opacity-100' : 'opacity-0'}`}>
+    <div className="flex items-center mb-2">
       <span className="text-terminal-green mr-2">$</span>
       <span className="text-terminal-text">{displayedText}</span>
-      {!isComplete && shouldStart && <TerminalCursor />}
+      {!isComplete && <TerminalCursor />}
     </div>
   );
 }
@@ -43,17 +52,12 @@ function TypingText({ text, delay = 0, shouldStart = true }: { text: string; del
 export function Hero() {
   const [showCursor, setShowCursor] = useState(false);
   const [showOutput1, setShowOutput1] = useState(false);
+  const [showCommand2, setShowCommand2] = useState(false);
   const [showOutput2, setShowOutput2] = useState(false);
+  const [showCommand3, setShowCommand3] = useState(false);
   const [showOutput3, setShowOutput3] = useState(false);
+  const [showCommand4, setShowCommand4] = useState(false);
   const [showOutput4, setShowOutput4] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => setShowOutput1(true), 1500);   // After "whoami" types (with initial delay)
-    setTimeout(() => setShowOutput2(true), 2500);   // After "cat role.txt" types
-    setTimeout(() => setShowOutput3(true), 4100);   // After "git log" types
-    setTimeout(() => setShowOutput4(true), 5850);   // After "cat credentials" types
-    setTimeout(() => setShowCursor(true), 7000);    // Show final cursor
-  }, []);
 
   return (
     <SectionContainer id="hero" className="relative flex items-center justify-center">
@@ -64,46 +68,70 @@ export function Hero() {
         className="w-full flex items-center justify-center"
       >
         <Terminal title="michael@portfolio:~" className="max-w-4xl w-full h-[530px]">
-          <TypingText text="whoami" delay={800} shouldStart={true} />
-          <div className={showOutput1 ? 'opacity-100' : 'opacity-0'}>
+          <TypingText
+            text="whoami"
+            delay={800}
+            onComplete={() => setShowOutput1(true)}
+          />
+
+          {showOutput1 && (
             <TerminalOutput>
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: showOutput1 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="text-terminal-text-bright text-2xl sm:text-3xl lg:text-4xl font-bold"
+                onAnimationComplete={() => setShowCommand2(true)}
               >
                 Michael D. Glenn
               </motion.div>
             </TerminalOutput>
-          </div>
+          )}
 
-          <div className="h-6" />
+          {showCommand2 && (
+            <>
+              <div className="h-6" />
+              <TypingText
+                text="cat role.txt"
+                delay={200}
+                onComplete={() => setShowOutput2(true)}
+              />
+            </>
+          )}
 
-          <TypingText text="cat role.txt" delay={200} shouldStart={showOutput1} />
-          <div className={showOutput2 ? 'opacity-100' : 'opacity-0'}>
+          {showOutput2 && (
             <TerminalOutput>
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: showOutput2 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="text-terminal-cyan text-lg sm:text-xl lg:text-2xl"
+                onAnimationComplete={() => setShowCommand3(true)}
               >
                 Site Reliability | Network Automation | Infrastructure
               </motion.div>
             </TerminalOutput>
-          </div>
+          )}
 
-          <div className="h-6" />
+          {showCommand3 && (
+            <>
+              <div className="h-6" />
+              <TypingText
+                text="git log --oneline --graph"
+                delay={200}
+                onComplete={() => setShowOutput3(true)}
+              />
+            </>
+          )}
 
-          <TypingText text="git log --oneline --graph" delay={200} shouldStart={showOutput2} />
-          <div className={showOutput3 ? 'opacity-100' : 'opacity-0'}>
+          {showOutput3 && (
             <TerminalOutput>
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: showOutput3 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="flex flex-col text-terminal-text font-mono text-sm"
+                onAnimationComplete={() => setShowCommand4(true)}
               >
                 <span><span className="text-terminal-orange">*</span> <span className="text-terminal-yellow">2025</span>  feat: Graduated @ Cornell University</span>
                 <span><span className="text-terminal-orange">*</span> <span className="text-terminal-yellow">2025</span>  feat: Site Reliability @ Cisco Meraki</span>
@@ -114,18 +142,27 @@ export function Hero() {
                 <span><span className="text-terminal-orange">*</span> <span className="text-terminal-yellow">2017</span>  init: Army Network Engineer & Paratrooper</span>
               </motion.div>
             </TerminalOutput>
-          </div>
+          )}
 
-          <div className="h-6" />
+          {showCommand4 && (
+            <>
+              <div className="h-6" />
+              <TypingText
+                text="cat /etc/security/credentials"
+                delay={200}
+                onComplete={() => setShowOutput4(true)}
+              />
+            </>
+          )}
 
-          <TypingText text="cat /etc/security/credentials" delay={200} shouldStart={showOutput3} />
-          <div className={showOutput4 ? 'opacity-100' : 'opacity-0'}>
+          {showOutput4 && (
             <TerminalOutput>
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: showOutput4 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-1 text-terminal-text"
+                onAnimationComplete={() => setShowCursor(true)}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-terminal-green">✓</span>
@@ -141,20 +178,21 @@ export function Hero() {
                 </div>
               </motion.div>
             </TerminalOutput>
-          </div>
+          )}
 
-          <div className="h-6" />
-
-          <div className={showCursor ? 'opacity-100' : 'opacity-0'}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: showCursor ? 1 : 0 }}
-              className="flex items-center"
-            >
-              <span className="text-terminal-green mr-2">$</span>
-              <TerminalCursor />
-            </motion.div>
-          </div>
+          {showCursor && (
+            <>
+              <div className="h-6" />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center"
+              >
+                <span className="text-terminal-green mr-2">$</span>
+                <TerminalCursor />
+              </motion.div>
+            </>
+          )}
         </Terminal>
 
         {/* Scroll Indicator */}
