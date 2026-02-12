@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* Terminal Color Palette */
+:root {
+  --terminal-bg: #0a0e14;
+  --terminal-bg-alt: #0f1419;
+  --terminal-border: #1a1f29;
+  --terminal-text: #b3b9c5;
+  --terminal-text-bright: #e6e9f0;
+  --terminal-comment: #626a73;
+  --terminal-green: #7fd962;
+  --terminal-cyan: #59c2ff;
+  --terminal-yellow: #f2cc60;
+  --terminal-orange: #ff8f40;
+  --terminal-red: #f07171;
+  --terminal-purple: #d2a6ff;
+}
+
+@theme inline {
+  /* Terminal Colors */
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-bg-alt: var(--terminal-bg-alt);
+  --color-terminal-border: var(--terminal-border);
+  --color-terminal-text: var(--terminal-text);
+  --color-terminal-text-bright: var(--terminal-text-bright);
+  --color-terminal-comment: var(--terminal-comment);
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-cyan: var(--terminal-cyan);
+  --color-terminal-yellow: var(--terminal-yellow);
+  --color-terminal-orange: var(--terminal-orange);
+  --color-terminal-red: var(--terminal-red);
+  --color-terminal-purple: var(--terminal-purple);
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Custom Animations */
+  --animate-blink: blink 1s step-end infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(127, 217, 98, 0.2); }
+  100% { box-shadow: 0 0 20px rgba(127, 217, 98, 0.6); }
+}
+
+body {
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
